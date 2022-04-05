@@ -4,32 +4,59 @@ import pyinputplus as pyip
 import random
 import os
 
-BOOK_LIST = "booklist.txt"
-TEMP_FILE = "temp.txt"
-MENU_OPTIONS = (
-    "Quit",
-    "Get random book",
-    "See list of books",
-    "Add book to list",
-    "Remove book from list",
-)
-
 
 def main():
     """Starts the program."""
+    ask_for_category()
 
-    check_booklist_txt()
+
+def ask_for_category():
+    """Asks user for list category, which will temporarily change the
+    text and filenames for the program."""
+
+    global CATEGORY
+    CATEGORY = input(
+        "What category do you want to work with?"
+        + "\nPlease enter a single word. (examples: books, movies)\n"
+    )
+
+    # Create file paths.
+    global LIST_PATH
+    LIST_PATH = f"{CATEGORY}list.txt"
+    global TEMP_FILE
+    TEMP_FILE = "temp.txt"
+
+    # Create menu options.
+    global MENU_OPTIONS
+    MENU_OPTIONS = (
+        "Quit",
+        f"Get random {CATEGORY}",
+        f"See list of {CATEGORY}",
+        f"Add {CATEGORY} to list",
+        f"Remove {CATEGORY} from list",
+        f"Switch to a different category."
+    )
+
+    print("\n")
+    start_up()
+
+
+def start_up():
+    """Calls check_list_txt() then main_menu(). Only used at the end of
+    the ask_for_category() function."""
+
+    check_list_txt()
     main_menu()
 
 
-def check_booklist_txt():
-    """Checks if booklist.txt exists. If not, it's created."""
+def check_list_txt():
+    """Checks if {CATEGORY}list.txt exists. If not, it's created."""
 
     try:
-        with open(BOOK_LIST, "r") as f:
+        with open(LIST_PATH, "r") as f:
             f.readline()
     except FileNotFoundError:
-        with open(BOOK_LIST, "a") as f:
+        with open(LIST_PATH, "a") as f:
             f.write("")
 
 
@@ -46,13 +73,15 @@ def main_menu():
     if selection == MENU_OPTIONS[0]:
         exit()
     elif selection == MENU_OPTIONS[1]:
-        get_rand_book()
+        get_rand_item()
     elif selection == MENU_OPTIONS[2]:
         see_list()
     elif selection == MENU_OPTIONS[3]:
-        add_book()
+        add_item()
     elif selection == MENU_OPTIONS[4]:
-        remove_book()
+        remove_item()
+    elif selection == MENU_OPTIONS[5]:
+        ask_for_category()
 
 
 def wait_menu():
@@ -73,73 +102,73 @@ def wait_menu():
         main_menu()
 
 
-def print_list():
-    """Prints the contents of booklist.txt"""
+def print_items():
+    """Prints the contents of {CATEGORY}list.txt"""
 
-    with open(BOOK_LIST, "r") as f:
+    with open(LIST_PATH, "r") as f:
 
         # Check if the first line is empty. If not, move on.
-        book_id = f.readline()
-        if book_id == "":
+        item_id = f.readline()
+        if item_id == "":
             print("\nThe list is empty.")
         else:
-            print("\nCurrent list of books:")
-            while book_id != "":
-                book = f.readline()
+            print(f"\nCurrent list of {CATEGORY}:")
+            while item_id != "":
+                item = f.readline()
                 # Strip \n
-                book_id = book_id.rstrip("\n")
-                book = book.rstrip("\n")
+                item_id = item_id.rstrip("\n")
+                item = item.rstrip("\n")
                 # Print, then continue reading.
-                print(f"{book_id} {book}")
-                book_id = f.readline()
+                print(f"{item_id} {item}")
+                item_id = f.readline()
 
 
 def see_list():
-    """Prints booklist.txt and waits for user to continue."""
+    """Prints {CATEGORY}list.txt and waits for user to continue."""
 
-    print_list()
+    print_items()
     wait_menu()
 
 
-def get_rand_book():
-    """Picks a random book from booklist.txt."""
+def get_rand_item():
+    """Picks a random item from {CATEGORY}list.txt."""
 
-    with open(BOOK_LIST, "r") as f:
+    with open(LIST_PATH, "r") as f:
         # Check if the list is empty, if not, continue.
-        book_id = f.readline()
-        if book_id == "":
+        item_id = f.readline()
+        if item_id == "":
             print("Sorry, the list is empty.")
         else:
-            # Add books to a list.
-            books = []
-            while book_id != "":
-                book_title = f.readline()
-                books.append(book_title)
-                book_id = f.readline()
+            # Add items to a list.
+            items = []
+            while item_id != "":
+                item_title = f.readline()
+                items.append(item_title)
+                item_id = f.readline()
 
-            # Pick a random book.
-            print("\nHere's a random book:")
-            print(random.choice(books))
+            # Pick a random item.
+            print("\nHere's a random item:")
+            print(random.choice(items))
     # Display menu when done.
     wait_menu()
 
 
-def add_book():
-    """Adds book(s) to booklist.txt."""
+def add_item():
+    """Adds item(s) to {CATEGORY}list.txt."""
 
     print("\nEnter 0 when you're done.")
-    book_entry = None  # Prepare for loop
-    book_id = 0  # Prepare for loop
-    while book_entry != "0":
-        with open(BOOK_LIST, "a") as f:
-            book_entry = input("Add book: ")
+    item_entry = None  # Prepare for loop
+    item_id = 0  # Prepare for loop
+    while item_entry != "0":
+        with open(LIST_PATH, "a") as f:
+            item_entry = input("Add item: ")
             # If done, don't write anything.
-            if book_entry == "0":
+            if item_entry == "0":
                 pass
             else:
-                book_id += 1
-                f.write(f"{book_id}.\n")
-                f.write(f"{book_entry}\n")
+                item_id += 1
+                f.write(f"{item_id}.\n")
+                f.write(f"{item_entry}\n")
 
     renumber_list()
 
@@ -148,41 +177,41 @@ def add_book():
     wait_menu()
 
 
-def remove_book():
-    """Removes book(s) from booklist.txt."""
+def remove_item():
+    """Removes item(s) from {CATEGORY}list.txt."""
 
     found = False  # bool flag
 
-    # Print book list.
-    print_list()
+    # Print item list.
+    print_items()
 
-    with open(BOOK_LIST, "r") as original_list:
+    with open(LIST_PATH, "r") as original_list:
         # Check if the file is empty, if not, continue reading.
-        book_id = original_list.readline()
-        if book_id == "":
-            print("You can't delete books from an empty list.")
+        item_id = original_list.readline()
+        if item_id == "":
+            print("You can't delete items from an empty list.")
         else:
-            # Ask user what book to delete.
-            search = input("Enter the number of the book you want to delete: ")
+            # Ask user what item to delete.
+            search = input("Enter the number of the item you want to delete: ")
 
-            while book_id != "":
-                # Read the book title field.
-                book_title = original_list.readline()
+            while item_id != "":
+                # Read the item title field.
+                item_title = original_list.readline()
 
                 # Strip the ID for the search.
-                book_id = book_id.rstrip(".\n")
+                item_id = item_id.rstrip(".\n")
                 with open(TEMP_FILE, "a") as temp_list:
-                    # If this is not the book to delete, write it to
+                    # If this is not the item to delete, write it to
                     # the temporary file.
-                    if book_id != search:
-                        temp_list.write(f"{book_id}.\n")
-                        temp_list.write(f"{book_title}")
+                    if item_id != search:
+                        temp_list.write(f"{item_id}.\n")
+                        temp_list.write(f"{item_title}")
                     else:
                         # Set the found flag to True.
                         found = True
 
                 # Continue reading.
-                book_id = original_list.readline()
+                item_id = original_list.readline()
 
             delete_rename_files()
 
@@ -198,24 +227,24 @@ def remove_book():
 
 
 def delete_rename_files():
-    """Delete the original booklist.txt and rename temp.txt."""
+    """Delete the original {CATEGORY}list.txt and rename temp.txt."""
 
-    os.remove(BOOK_LIST)
-    os.rename(TEMP_FILE, BOOK_LIST)
+    os.remove(LIST_PATH)
+    os.rename(TEMP_FILE, LIST_PATH)
 
 
 def renumber_list():
-    """Properly numbers the list after adding or removing books."""
+    """Properly numbers the list after adding or removing items."""
 
-    with open(BOOK_LIST, "r") as original_list, open(TEMP_FILE, "w") as temp_list:
-        book_id = original_list.readline()
+    with open(LIST_PATH, "r") as original_list, open(TEMP_FILE, "w") as temp_list:
+        item_id = original_list.readline()
         count = 0
-        while len(book_id) == 3:
+        while len(item_id) == 3:
             count += 1
             temp_list.write(f"{count}.\n")
-            book_title = original_list.readline()
-            temp_list.write(f"{book_title}")
-            book_id = original_list.readline()
+            item_title = original_list.readline()
+            temp_list.write(f"{item_title}")
+            item_id = original_list.readline()
 
         delete_rename_files()
 
